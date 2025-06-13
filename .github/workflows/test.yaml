@@ -1,0 +1,92 @@
+name: PR Test
+
+on:
+  pull_request:
+  
+jobs: 
+
+  terraform-init: 
+    runs-on: ubunutu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Set Up Terraform CLI
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.WORKLOAD_POOL }}/providers/${{ secrets.WORKLOAD_PROVIDER }}
+          service_account:           ${{ secrets.CLOUD_RUN_SA }}
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        working-directory: ./tf_test/terraform-google-vault
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: |
+          eval `ssh-agent -s`
+          ssh-add - <<< '${{ secrets.SSH_KEY_GITHUB_ACTIONS }}'
+          terraform init
+        working-directory: ./tf_test/terraform-google-vault
+
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ./tf_test/terraform-google-vault
+
+      - name: Terraform Plan
+        id: plan
+        continue-on-error: false
+        shell: bash
+        working-directory: ./tf_test/terraform-google-vault
+        run: |
+          VAR_FILES=$(find . -name 'dev*.tfvars')
+          VAR_FILE_LIST=""
+
+          for VAR_FILE in $VAR_FILES
+          do
+            VAR_FILE_LIST+="-var-file=${VAR_FILE} "
+          done
+
+          terraform plan -input=false ${VAR_FILE_LIST} -no-color -out=tfplan | tee tf_plan_output.txt
+          if grep -q "Terraform will perform the following actions:" tf_plan_output.txt; then
+            echo "has_changes to true"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "Setting has_changes to false"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: List changed files
+        id: list
+        run: |
+          echo "::set-output name=files::\
+              $(git diff --name-only ${{ github.event.pull_request.base.sha }} \
+              ${{ github.event.pull_request.head.sha }} \
+              | tr '\n' ' ')"
+
+      - name: Archive changed files
+        run: |
+          tar czf changed_files.tar.gz ${{ steps.list.outputs.files }} tf_plan_output.txt
+
+      - name: Invoke GenAI Cloud Run
+        env:
+          CLOUD_RUN_URL: ${{ secrets.CLOUD_RUN_URL }}
+          PR_NUMBER:    ${{ github.event.pull_request.number }}
+          REPO_FULL:    ${{ github.repository }}
+        run: |
+          ID_TOKEN=$(gcloud auth print-identity-token)
+          curl -X POST "$CLOUD_RUN_URL" \
+            -H "Authorization: Bearer $ID_TOKEN" \
+            -H "Content-Type: application/gzip" \
+            -H "X-PR-Number: $PR_NUMBER" \
+            -H "X-Repo: $REPO_FULL"   \
+            --data-binary @changed_files.tar.gz

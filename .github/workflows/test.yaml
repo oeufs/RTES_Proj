@@ -34,7 +34,7 @@ jobs:
         id: chk
         run: |
             ls -al
-            cd tf_test/terraform-google-vault
+            cd tf_test
             ls -al
             
 

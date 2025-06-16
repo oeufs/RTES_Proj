@@ -11,9 +11,9 @@ jobs:
 
   terraform-init: 
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: tf_test/terraform-google-vault
+    # defaults:
+    #   run:
+    #     working-directory: tf_test/terraform-google-vault
 
     steps:
       - name: Checkout Code

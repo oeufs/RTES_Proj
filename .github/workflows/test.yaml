@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
       - name: Set Up Terraform CLI
         uses: hashicorp/setup-terraform@v3
@@ -27,6 +29,14 @@ jobs:
           workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.WORKLOAD_POOL }}/providers/${{ secrets.WORKLOAD_PROVIDER }}
           service_account: ${{ secrets.CLOUD_RUN_SA }}
           token_format: 'access_token'
+
+      - name: chk
+        id: chk
+        run: |
+            ls -al
+            cd tf_test/terraform-google-vault
+            ls -al
+            
 
       - name: Terraform fmt
         id: fmt

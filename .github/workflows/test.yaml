@@ -45,15 +45,7 @@ jobs:
         shell: bash
         working-directory: ./tf_test/terraform-google-vault
         run: |
-          VAR_FILES=$(find . -name 'dev*.tfvars')
-          VAR_FILE_LIST=""
-
-          for VAR_FILE in $VAR_FILES
-          do
-            VAR_FILE_LIST+="-var-file=${VAR_FILE} "
-          done
-
-          terraform plan -input=false ${VAR_FILE_LIST} -no-color -out=tfplan | tee tf_plan_output.txt
+          terraform plan -no-color -out=tfplan | tee tf_plan_output.txt
           if grep -q "Terraform will perform the following actions:" tf_plan_output.txt; then
             echo "has_changes to true"
             echo "has_changes=true" >> $GITHUB_OUTPUT

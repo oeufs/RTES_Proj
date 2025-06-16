@@ -34,8 +34,9 @@ jobs:
         id: fmt
         working-directory: ./tf_test/terraform-google-vault
         run: |
+            ls -al
             terraform fmt -check
-            ls
+            
         continue-on-error: true
 
       - name: Terraform Init

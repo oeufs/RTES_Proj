@@ -11,12 +11,15 @@ jobs:
 
   terraform-init: 
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tf_test/terraform-google-vault
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          submodules: recursive
       
       - name: Set Up Terraform CLI
         uses: hashicorp/setup-terraform@v3
@@ -35,33 +38,24 @@ jobs:
         id: chk
         run: |
             ls -al
-            cd tf_test
-            ls -al
-            
-
+          
       - name: Terraform fmt
         id: fmt
-        working-directory: ./tf_test/terraform-google-vault
-        run: |
-            ls -al
-            terraform fmt -check
+        run: terraform fmt -check
             
         continue-on-error: true
 
       - name: Terraform Init
         id: init
-        working-directory: ./tf_test/terraform-google-vault
         run: terraform init
 
 
       - name: Terraform Validate
         id: validate
-        working-directory: ./tf_test/terraform-google-vault
         run: terraform validate -no-color
 
       - name: Terraform Plan
         id: plan
-        working-directory: ./tf_test/terraform-google-vault
         continue-on-error: false
         shell: bash
         run: |

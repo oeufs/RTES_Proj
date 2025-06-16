@@ -59,7 +59,7 @@ jobs:
         continue-on-error: false
         shell: bash
         run: |
-          terraform plan -var 'project_id=${{ secrets.GCP_PROJECT_NUMBER }}' -no-color -out=tfplan | tee tf_plan_output.txt
+          terraform plan -var 'project_id=${{ secrets.GCP_PROJECT_NUMBER }}' -no-color -detailed-exitcode -out=tfplan 2>&1 | tee tf_plan_output.txt
           if grep -q "Terraform will perform the following actions:" tf_plan_output.txt; then
             echo "has_changes to true"
             echo "has_changes=true" >> $GITHUB_OUTPUT

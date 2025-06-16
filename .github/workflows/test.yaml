@@ -17,8 +17,9 @@ jobs:
           terraform_version: 1.5
 
       - name: Authenticate to GCP
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         with:
+          project_id: ${{ secrets.GCP_PROJECT_NUMBER }}
           workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.WORKLOAD_POOL }}/providers/${{ secrets.WORKLOAD_PROVIDER }}
           service_account:           ${{ secrets.CLOUD_RUN_SA }}
 

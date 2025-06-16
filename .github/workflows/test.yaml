@@ -30,10 +30,7 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: |
-          eval `ssh-agent -s`
-          ssh-add - <<< '${{ secrets.SSH_KEY_GITHUB_ACTIONS }}'
-          terraform init
+        run: terraform init
         working-directory: ./tf_test/terraform-google-vault
 
 

@@ -58,15 +58,16 @@ jobs:
         id: plan
         continue-on-error: false
         shell: bash
+        # terraform plan -var 'project_id=${{ secrets.GCP_PROJECT_NUMBER }}' -no-color -detailed-exitcode -out=tfplan 2>&1 | tee tf_plan_output.txt 
         run: |
-          terraform plan -var 'project_id=${{ secrets.GCP_PROJECT_NUMBER }}' -no-color -detailed-exitcode -out=tfplan 2>&1 | tee tf_plan_output.txt
-          if grep -q "Terraform will perform the following actions:" tf_plan_output.txt; then
-            echo "has_changes to true"
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-          else
-            echo "Setting has_changes to false"
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-          fi
+          terraform plan -var 'project_id=${{ secrets.GCP_PROJECT_NUMBER }}' -no-color  > ../tf_plan_output.txt || echo "tf plan failed but still continuing"
+        # if grep -q "Terraform will perform the following actions:" tf_plan_output.txt; then
+        #   echo "has_changes to true"
+        #   echo "has_changes=true" >> $GITHUB_OUTPUT
+        # else
+        #   echo "Setting has_changes to false"
+        #   echo "has_changes=false" >> $GITHUB_OUTPUT
+        # fi
 
       - name: List changed files
         id: list

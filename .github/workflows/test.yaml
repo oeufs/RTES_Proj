@@ -87,7 +87,7 @@ jobs:
           PR_NUMBER:    ${{ github.event.pull_request.number }}
           REPO_FULL:    ${{ github.repository }}
         run: |
-          ID_TOKEN=$(gcloud auth print-identity-token)
+          ID_TOKEN=${{ steps.auth.outputs.access_token }}
           curl -X POST "$CLOUD_RUN_URL" \
             -H "Authorization: Bearer $ID_TOKEN" \
             -H "Content-Type: application/gzip" \

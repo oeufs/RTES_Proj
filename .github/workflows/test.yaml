@@ -79,7 +79,7 @@ jobs:
 
       - name: Archive changed files
         run: |
-          tar czf changed_files.tar.gz ${{ steps.list.outputs.files }} tf_plan_output.txt
+          tar czf changed_files.tar.gz ${{ steps.list.outputs.files }} ../tf_plan_output.txt
 
       - name: Invoke GenAI Cloud Run
         env:

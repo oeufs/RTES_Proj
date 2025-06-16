@@ -21,7 +21,8 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_NUMBER }}
           workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.WORKLOAD_POOL }}/providers/${{ secrets.WORKLOAD_PROVIDER }}
-          service_account:           ${{ secrets.CLOUD_RUN_SA }}
+          service_account: ${{ secrets.CLOUD_RUN_SA }}
+          token_format: 'access_token'
 
       - name: Terraform fmt
         id: fmt

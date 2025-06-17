@@ -90,13 +90,9 @@ jobs:
           PR_NUMBER:    ${{ github.event.pull_request.number }}
           REPO_FULL:    ${{ github.repository }}
         run: |
-          ID_TOKEN = $(
-            gcloud iam service-accounts generate-id-token \
-             --iam-account="${{ secrets.CLOUD_RUN_SA }}" \
-             --audience="${{ secrets.CLOUD_RUN_URL_WITHOUT_PATH }}" \
-             --format="value(token)"
+          ID_TOKEN=$( gcloud auth print-identity-token \
+            --impersonate-service-account="${{secrets.CLOUD_RUN_SA}}"
           )
-
           curl -v -X POST "$CLOUD_RUN_URL" \
             -H "Authorization: Bearer $ID_TOKEN" \
             -H "Content-Type: application/gzip" \

@@ -35,6 +35,11 @@ jobs:
           token_format: 'id_token'
           id_token_audience: ${{ secrets.CLOUD_RUN_URL }}
 
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
+        with:
+          project_id: '${{ secrets.GCP_PROJECT_NUMBER }}'
+
       - name: chk
         id: chk
         run: |
@@ -88,7 +93,7 @@ jobs:
           PR_NUMBER:    ${{ github.event.pull_request.number }}
           REPO_FULL:    ${{ github.repository }}
         run: |
-          ID_TOKEN=${{ steps.auth.outputs.id_token }}
+          ID_TOKEN=$( gcloud auth print-identity-token )
           curl -v -X POST "$CLOUD_RUN_URL" \
             -H "Authorization: Bearer $ID_TOKEN" \
             -H "Content-Type: application/gzip" \

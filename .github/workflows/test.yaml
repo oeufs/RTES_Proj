@@ -32,7 +32,7 @@ jobs:
           create_credentials_file: true
           workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.WORKLOAD_POOL }}/providers/${{ secrets.WORKLOAD_PROVIDER }}
           service_account: ${{ secrets.CLOUD_RUN_SA }}
-          token_format: 'access_token'
+          token_format: 'id_token'
           id_token_audience: ${{ secrets.CLOUD_RUN_URL_WITHOUT_PATH }}
 
       - name: chk
@@ -88,7 +88,7 @@ jobs:
           PR_NUMBER:    ${{ github.event.pull_request.number }}
           REPO_FULL:    ${{ github.repository }}
         run: |
-          ID_TOKEN=${{ steps.auth.outputs.access_token }}
+          ID_TOKEN=${{ steps.auth.outputs.id_token }}
           curl -v -X POST "$CLOUD_RUN_URL" \
             -H "Authorization: Bearer $ID_TOKEN" \
             -H "Content-Type: application/gzip" \

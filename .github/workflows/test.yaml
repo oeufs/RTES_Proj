@@ -64,6 +64,13 @@ jobs:
         # terraform plan -var 'project_id=${{ secrets.GCP_PROJECT_NUMBER }}' -no-color -detailed-exitcode -out=tfplan 2>&1 | tee tf_plan_output.txt 
         run: |
           terraform plan -var 'project_id=${{ secrets.GCP_PROJECT_NUMBER }}' -no-color  > ../tf_plan_output.txt || echo "tf plan failed but still continuing"
+        # if grep -q "Terraform will perform the following actions:" tf_plan_output.txt; then
+        #   echo "has_changes to true"
+        #   echo "has_changes=true" >> $GITHUB_OUTPUT
+        # else
+        #   echo "Setting has_changes to false"
+        #   echo "has_changes=false" >> $GITHUB_OUTPUT
+        # fi
 
       - name: List changed files
         id: list
@@ -83,6 +90,10 @@ jobs:
           PR_NUMBER:    ${{ github.event.pull_request.number }}
           REPO_FULL:    ${{ github.repository }}
         run: |
+          ID_TOKEN=$( gcloud auth print-identity-token \
+            --impersonate-service-account="${{secrets.CLOUD_RUN_SA}}" \
+            --audiences="${{secrets.CLOUD_RUN_URL_WITHOUT_PATH}}")
+            
           curl -v -X POST "$CLOUD_RUN_URL" \
             -H "Authorization: Bearer $ID_TOKEN" \
             -H "Content-Type: application/gzip" \
